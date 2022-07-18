@@ -14,7 +14,7 @@ window.location.search.substr(1).split('&').forEach(function (s) {
 //   Constants: Full capital letters
 //   Variables: CamelCase
 AC = (window.AudioContext) ? new AudioContext() : new webkitAudioContext();
-SEMITONERATIO = Math.pow(2, 1/12);
+SEMITONERATIO = Math.pow(2, 1 / 12);
 MAGNIFY = OPTS.mag || OPTS.magnify || 2;
 CHARSIZE = 16 * MAGNIFY;
 HALFCHARSIZE = Math.floor(CHARSIZE / 2);
@@ -22,13 +22,13 @@ BUTTONS = [];
 MouseX = 0;
 MouseY = 0;
 CONSOLE = document.getElementById("console");
-ORGWIDTH  = 256;
+ORGWIDTH = 256;
 ORGHEIGHT = 224;
 SCRHEIGHT = 152;
-CONSOLE.style.width  = ORGWIDTH  * MAGNIFY + "px";
+CONSOLE.style.width = ORGWIDTH * MAGNIFY + "px";
 CONSOLE.style.height = ORGHEIGHT * MAGNIFY + "px";
 OFFSETLEFT = CONSOLE.offsetLeft;
-OFFSETTOP  = CONSOLE.offsetTop;
+OFFSETTOP = CONSOLE.offsetTop;
 CurChar = 0;
 CurPos = 0;
 CurSong = undefined; // For Embedded Songs
@@ -40,7 +40,7 @@ Mario = null; // Mamma Mia!
 AnimeID = 0; // ID for cancel animation
 PsedoSheet = null // CSSRules for manipulating pseudo elements
 RepeatMark = null // For Score
-EndMark    = null
+EndMark = null
 
 /*
  * GameStatus: Game mode
@@ -52,15 +52,15 @@ EndMark    = null
 GameStatus = 0;
 
 // shim layer with setTimeout fallback
-window.requestAnimFrame = (function(){
-return  window.requestAnimationFrame ||
-  window.webkitRequestAnimationFrame ||
-  window.mozRequestAnimationFrame    ||
-  window.oRequestAnimationFrame      ||
-  window.msRequestAnimationFrame     ||
-  function( callback ){
-  window.setTimeout(callback, 1000 / 60);
-};
+window.requestAnimFrame = (function () {
+  return window.requestAnimationFrame ||
+    window.webkitRequestAnimationFrame ||
+    window.mozRequestAnimationFrame ||
+    window.oRequestAnimationFrame ||
+    window.msRequestAnimationFrame ||
+    function (callback) {
+      window.setTimeout(callback, 1000 / 60);
+    };
 })();
 
 // SoundEntity#constructor
@@ -74,7 +74,7 @@ function SoundEntity(path) {
 // SoundEntity#play
 // The all wav files are recorded in the tone F.
 // You should choose correct playback rate to play a music.
-SoundEntity.prototype.play = function(scale, delay) {
+SoundEntity.prototype.play = function (scale, delay) {
   var source = AC.createBufferSource();
   var tmps = scale & 0x0F;
   var semitone = this.diff[tmps];
@@ -97,7 +97,7 @@ SoundEntity.prototype.play = function(scale, delay) {
 //   Long note like Yoshi can be canceled often
 //   BufferSource.stop won't throw an error even if the
 //   previous note has already ended.
-SoundEntity.prototype.playChord = function(noteList, delay) {
+SoundEntity.prototype.playChord = function (noteList, delay) {
   // Cancel previous chord first
   for (var i = 0; i < this.prevChord.length; i++) {
     this.prevChord[i].stop();
@@ -124,7 +124,7 @@ SoundEntity.prototype.playChord = function(noteList, delay) {
   }
 }
 
-SoundEntity.prototype.load = function() {
+SoundEntity.prototype.load = function () {
   var filepath = this.path;
   return new Promise(function (resolve, reject) {
     // Load buffer asynchronously
@@ -132,23 +132,23 @@ SoundEntity.prototype.load = function() {
     request.open("GET", filepath, true);
     request.responseType = "arraybuffer";
 
-    request.onload = function() {
+    request.onload = function () {
       // Asynchronously decode the audio file data in request.response
       AC.decodeAudioData(
         request.response,
-        function(buffer) {
+        function (buffer) {
           if (!buffer) {
             reject('error decoding file data: ' + url);
           }
           resolve(buffer);
         },
-        function(error) {
+        function (error) {
           reject('decodeAudioData error:' + error);
         }
       );
     }
 
-    request.onerror = function() {
+    request.onerror = function () {
       reject('BufferLoader: XHR error');
     }
 
@@ -165,21 +165,21 @@ function MarioClass() {
   this.pos = 0;      // position in bar number
 }
 
-MarioClass.prototype.init = function() {
+MarioClass.prototype.init = function () {
   this.x = -16;
   this.pos = 0;
   this.start = 0;
   this.state = 0;
   this.scroll = 0;
   this.offset = -16;
-  this.timer = new easyTimer(100, function(timer) {
+  this.timer = new easyTimer(100, function (timer) {
     Mario.state = (Mario.state == 1) ? 0 : 1;
   });
   this.timer.switch = true; // forever true;
   this.isJumping = false;
 };
 
-MarioClass.prototype.enter = function(timeStamp) {
+MarioClass.prototype.enter = function (timeStamp) {
   if (this.start == 0) this.start = timeStamp;
 
   var diff = timeStamp - this.start;
@@ -193,7 +193,7 @@ MarioClass.prototype.enter = function(timeStamp) {
   this.draw();
 };
 
-MarioClass.prototype.init4leaving = function() {
+MarioClass.prototype.init4leaving = function () {
   this.offset = this.x;
   this.start = 0;
   this.isJumping = false;
@@ -227,7 +227,7 @@ MarioClass.prototype.init4leaving = function() {
  * Mario should jump from one bar before the next bar which has the note(s)
  *
  */
-MarioClass.prototype.init4playing = function(timeStamp) {
+MarioClass.prototype.init4playing = function (timeStamp) {
   this.lastTime = timeStamp;
   this.offset = this.x;
   this.scroll = 0;
@@ -236,7 +236,7 @@ MarioClass.prototype.init4playing = function(timeStamp) {
   this.checkMarioShouldJump();
 };
 
-MarioClass.prototype.checkMarioShouldJump = function() {
+MarioClass.prototype.checkMarioShouldJump = function () {
   var notes = CurScore.notes[this.pos - 1];
   if (notes == undefined || notes.length == 0) {
     this.isJumping = false;
@@ -246,7 +246,7 @@ MarioClass.prototype.checkMarioShouldJump = function() {
     this.isJumping = true;
 };
 
-MarioClass.prototype.play = function(timeStamp) {
+MarioClass.prototype.play = function (timeStamp) {
   // function for setting a chord to SoundEntities and playing it
   function scheduleAndPlay(notes, time) {
     if (time < 0) time = 0;
@@ -265,7 +265,7 @@ MarioClass.prototype.play = function(timeStamp) {
 
       var num = note >> 8;
       var scale = note & 0xFF;
-      if  (!dic[num]) dic[num] = [scale];
+      if (!dic[num]) dic[num] = [scale];
       else dic[num].push(scale);
     }
     for (var i in dic) {
@@ -330,13 +330,13 @@ MarioClass.prototype.play = function(timeStamp) {
 };
 
 // Mario Jump
-MarioClass.prototype.jump = function(x) {
+MarioClass.prototype.jump = function (x) {
   var h = [0, 2, 4, 6, 8, 10, 12, 13, 14, 15, 16, 17, 18, 18, 19, 19, 19,
-           19, 19, 18, 18, 17, 16, 15, 14, 13, 12, 10, 8, 6, 4, 2, 0];
+    19, 19, 18, 18, 17, 16, 15, 14, 13, 12, 10, 8, 6, 4, 2, 0];
   return h[Math.round(x) % 32];
 }
 
-MarioClass.prototype.draw = function() {
+MarioClass.prototype.draw = function () {
   var y = (41 - 22);
   var state = this.state
   if (this.isJumping) {
@@ -354,7 +354,7 @@ MarioClass.prototype.draw = function() {
   L2C.drawImage(this.images[state], this.x * MAGNIFY, y * MAGNIFY);
 };
 
-MarioClass.prototype.leave = function(timeStamp) {
+MarioClass.prototype.leave = function (timeStamp) {
   if (this.start == 0) this.start = timeStamp;
 
   var diff = timeStamp - this.start;
@@ -368,14 +368,14 @@ MarioClass.prototype.leave = function(timeStamp) {
   } else
     this.x = Math.floor(diff / 4) + this.offset;
   if (Math.floor(diff / 100) % 2 == 0) {
-    this.state =  8;
+    this.state = 8;
     this.draw();
     var w = sweatimg.width;
     var h = sweatimg.height;
     L2C.drawImage(sweatimg,
-        0, 0, w, h,
-        (this.x - (w + 1)) * MAGNIFY, (41 - 22) * MAGNIFY,
-        w * MAGNIFY, h * MAGNIFY);
+      0, 0, w, h,
+      (this.x - (w + 1)) * MAGNIFY, (41 - 22) * MAGNIFY,
+      w * MAGNIFY, h * MAGNIFY);
   } else {
     this.state = 9;
     this.draw();
@@ -390,7 +390,7 @@ function easyTimer(time, func) {
   this.switch = false;
 }
 
-easyTimer.prototype.checkAndFire = function(time) {
+easyTimer.prototype.checkAndFire = function (time) {
   if (this.switch && time - this.lastTime > this.time) {
     this.func(this);
     this.lastTime = time;
@@ -404,18 +404,18 @@ for (i = 1; i < 21; i++) {
   tmp += i.toString();
   var file = "wav/sound" + tmp.substr(-2) + ".wav";
   var e = new SoundEntity(file);
-  SOUNDS[i-1] = e;
+  SOUNDS[i - 1] = e;
 }
 
 // Prepare Mat
 MAT = document.getElementById("layer1");
-MAT.width  = ORGWIDTH  * MAGNIFY;
+MAT.width = ORGWIDTH * MAGNIFY;
 MAT.height = ORGHEIGHT * MAGNIFY;
 L1C = MAT.getContext('2d');
 L1C.imageSmoothingEnabled = false;
 var mi = new Image();
 mi.src = "image/mat.png";
-mi.onload = function() {
+mi.onload = function () {
   L1C.drawImage(mi, 0, 0, mi.width * MAGNIFY, mi.height * MAGNIFY);
 };
 
@@ -569,7 +569,7 @@ function drawScore(pos, notes, scroll) {
     } else {
       L2C.strokeStyle = '#A0C0B0';
     }
-    L2C.moveTo(x,  41 * MAGNIFY);
+    L2C.moveTo(x, 41 * MAGNIFY);
     L2C.lineTo(x, 148 * MAGNIFY);
     L2C.stroke();
 
@@ -578,7 +578,7 @@ function drawScore(pos, notes, scroll) {
 
     // Get notes down
     var delta = 0;
-    if (GameStatus == 2  && Mario.pos - 2 == barnum) {
+    if (GameStatus == 2 && Mario.pos - 2 == barnum) {
       var idx;
       if (Mario.x == 120) {
         idx = (Mario.scroll >= 16) ? Mario.scroll - 16 : Mario.scroll + 16;
@@ -586,7 +586,7 @@ function drawScore(pos, notes, scroll) {
         idx = Mario.x + 8 - xorg;
       }
       var tbl = [0, 1, 2, 3, 3, 4, 5, 5, 6, 6, 7, 7, 8, 8, 8, 8,
-                 8, 8, 8, 8, 8, 7, 7, 6, 6, 5, 5, 4, 3, 3, 2, 1, 0];
+        8, 8, 8, 8, 8, 7, 7, 6, 6, 5, 5, 4, 3, 3, 2, 1, 0];
       delta = tbl[Math.round(idx)];
     }
     var hflag = false;
@@ -594,11 +594,11 @@ function drawScore(pos, notes, scroll) {
       if (typeof b[j] == "string") continue; // for dynamic TEMPO
 
       var sndnum = b[j] >> 8;
-      var scale  = b[j] & 0x0F;
+      var scale = b[j] & 0x0F;
       // When CurChar is eraser, and the mouse cursor is on the note,
       // an Image of note blinks.
       if (CurChar == 16 && g != false && i == gridX && scale == gridY &&
-          eraserTimer.currentFrame == 1) {continue;}
+        eraserTimer.currentFrame == 1) { continue; }
 
       if (!hflag && (scale >= 11)) {
         hflag = true;
@@ -657,7 +657,7 @@ function drawBarNumber(gridX, barnum) {
 }
 
 function changeCursor(num) {
-  SCREEN.style.cursor = 'url(' + SOUNDS[num].image.src + ')' + HALFCHARSIZE +' '+ HALFCHARSIZE + ', auto';
+  SCREEN.style.cursor = 'url(' + SOUNDS[num].image.src + ')' + HALFCHARSIZE + ' ' + HALFCHARSIZE + ', auto';
 }
 
 function drawCurChar(image) {
@@ -685,12 +685,12 @@ function drawEraserIcon() {
 }
 
 function toGrid(realX, realY) {
-  var gridLeft   = (8   + 0) * MAGNIFY;
-  var gridTop    = (41     ) * MAGNIFY;
-  var gridRight  = (247 - 4) * MAGNIFY;
+  var gridLeft = (8 + 0) * MAGNIFY;
+  var gridTop = (41) * MAGNIFY;
+  var gridRight = (247 - 4) * MAGNIFY;
   var gridBottom = (148 - 4) * MAGNIFY;
   if (realX < gridLeft || realX > gridRight ||
-      realY < gridTop  || realY > gridBottom)
+    realY < gridTop || realY > gridBottom)
     return false;
 
   var gridX = Math.floor((realX - gridLeft) / CHARSIZE);
@@ -708,7 +708,7 @@ function toGrid(realX, realY) {
 SCREEN = document.getElementById("layer2");
 // You should not use .style.width(or height) here.
 // You must not append "px" here.
-SCREEN.width  = ORGWIDTH  * MAGNIFY;
+SCREEN.width = ORGWIDTH * MAGNIFY;
 SCREEN.height = SCRHEIGHT * MAGNIFY;
 L2C = SCREEN.getContext('2d');
 L2C.imageSmoothingEnabled = false;
@@ -765,14 +765,14 @@ function mouseClickListener(e) {
   //
   // Handle semitone
   if (e.shiftKey) gridY |= 0x80;
-  if (e.ctrlKey ) gridY |= 0x40;
+  if (e.ctrlKey) gridY |= 0x40;
   SOUNDS[CurChar].play(gridY);
   note = (CurChar << 8) | gridY;
   notes.push(note);
   CurScore['notes'][b] = notes;
 }
 
-SCREEN.addEventListener("mousemove", function(e) {
+SCREEN.addEventListener("mousemove", function (e) {
   MouseX = e.clientX;
   MouseY = e.clientY;
 });
@@ -780,7 +780,7 @@ SCREEN.addEventListener("mousemove", function(e) {
 // Read MSQ File
 // You really need this "dragover" event listener.
 // Check StackOverflow: http://bit.ly/1hHEINZ
-SCREEN.addEventListener("dragover", function(e) {
+SCREEN.addEventListener("dragover", function (e) {
   e.preventDefault();
   return false;
 });
@@ -789,7 +789,7 @@ SCREEN.addEventListener("dragover", function(e) {
 // But you might want to download files parallel.
 // In such a case, Promise is very convinient utility.
 // http://www.html5rocks.com/en/tutorials/es6/promises/
-SCREEN.addEventListener("drop", function(e) {
+SCREEN.addEventListener("drop", function (e) {
   e.preventDefault();
   clearSongButtons();
   fullInitScore();
@@ -797,10 +797,10 @@ SCREEN.addEventListener("drop", function(e) {
   // Input is a instance of a File object.
   // Returns a instance of a Promise.
   function readFile(file) {
-    return new Promise(function(resolve, reject) {
+    return new Promise(function (resolve, reject) {
       var reader = new FileReader();
       reader.name = file.name;
-      reader.addEventListener("load", function(e) {
+      reader.addEventListener("load", function (e) {
         resolve(e.target);
       });
       reader.readAsText(file, 'shift-jis');
@@ -812,7 +812,7 @@ SCREEN.addEventListener("drop", function(e) {
   // Support Mr.Phenix's files. He numbered files with decimal numbers :-)
   // http://music.geocities.jp/msq_phenix/
   // For example, suite15.5.msq must be after the suite15.msq
-  files.sort(function(a,b) {
+  files.sort(function (a, b) {
     var n1 = a.name;
     var n2 = b.name;
     function strip(name) {
@@ -823,22 +823,22 @@ SCREEN.addEventListener("drop", function(e) {
     }
     return strip(n1) - strip(n2);
   });
-  files.map(readFile).reduce(function(chain, fp, idx) {
-    return chain.then(function() {
+  files.map(readFile).reduce(function (chain, fp, idx) {
+    return chain.then(function () {
       return fp;
-    }).then(function(fileReader) {
+    }).then(function (fileReader) {
       var ext = fileReader.name.slice(-3);
       if (ext == "msq") {
         addMSQ(fileReader.result);
       } else {
         addJSON(fileReader.result);
       }
-    }).catch(function(err) {
+    }).catch(function (err) {
       alert("Loading MSQ failed: " + err.message);
       console.log(err);
     });
   }, Promise.resolve())
-  .then(closing);
+    .then(closing);
 
   return false;
 });
@@ -870,7 +870,7 @@ function addMSQ(text) {
   lines = text.split(/\r\n|\r|\n/);
   keyword = ["SCORE", "TEMPO", "LOOP", "END", "TIME44"];
   var values = {};
-  lines.forEach(function(line, i) {
+  lines.forEach(function (line, i) {
     if (line === "") return;
     var kv = line.split("=");
     var k = kv[0];
@@ -901,7 +901,7 @@ function addMSQ(text) {
     CurScore.notes[count++] = bar;
   }
 
-  CurScore.end  += parseInt(values.END) - 1;
+  CurScore.end += parseInt(values.END) - 1;
   if (CurScore.tempo != values.TEMPO)
     CurScore.notes[oldEnd].splice(0, 0, "TEMPO=" + values.TEMPO);
   CurScore.tempo = values.TEMPO;
@@ -964,7 +964,7 @@ function makeButton(x, y, w, h) {
   b.originalY = y;
   b.originalW = w;
   b.originalH = h;
-  b.redraw = function() {
+  b.redraw = function () {
     moveDOM(this, this.originalX, this.originalY);
     resizeDOM(this, this.originalW, this.originalH);
   }
@@ -972,13 +972,13 @@ function makeButton(x, y, w, h) {
 }
 
 function resizeDOM(b, w, h) {
-  b.style.width =  w * MAGNIFY + "px";
+  b.style.width = w * MAGNIFY + "px";
   b.style.height = h * MAGNIFY + "px";
 }
 
 function moveDOM(b, x, y) {
-  b.style.left =   x * MAGNIFY + "px";
-  b.style.top =    y * MAGNIFY + "px";
+  b.style.left = x * MAGNIFY + "px";
+  b.style.top = y * MAGNIFY + "px";
 }
 
 // Select Listener
@@ -995,20 +995,20 @@ function resizeScreen() {
   CHARSIZE = 16 * MAGNIFY;
   HALFCHARSIZE = Math.floor(CHARSIZE / 2);
 
-  CONSOLE.style.width  = ORGWIDTH  * MAGNIFY + "px";
+  CONSOLE.style.width = ORGWIDTH * MAGNIFY + "px";
   CONSOLE.style.height = ORGHEIGHT * MAGNIFY + "px";
   OFFSETLEFT = CONSOLE.offsetLeft;
-  OFFSETTOP  = CONSOLE.offsetTop;
+  OFFSETTOP = CONSOLE.offsetTop;
 
   BOMBS = sliceImage(bombimg, 14, 18);
   Mario.images = sliceImage(marioimg, 16, 22);
   Semitones = sliceImage(semitoneimg, 5, 12);
 
-  MAT.width  = ORGWIDTH  * MAGNIFY;
+  MAT.width = ORGWIDTH * MAGNIFY;
   MAT.height = ORGHEIGHT * MAGNIFY;
   L1C.drawImage(mi, 0, 0, mi.width * MAGNIFY, mi.height * MAGNIFY);
 
-  SCREEN.width  = ORGWIDTH  * MAGNIFY;
+  SCREEN.width = ORGWIDTH * MAGNIFY;
   SCREEN.height = SCRHEIGHT * MAGNIFY;
 
   var imgs = sliceImage(char_sheet, 16, 16);
@@ -1023,7 +1023,7 @@ function resizeScreen() {
   // Endmark Cursor (= 15) will be redrawn by its animation
   // Eraser (= 16) will be redrawn later below
   if (CurChar < 15) {
-   changeCursor(CurChar);
+    changeCursor(CurChar);
   }
 
   if (CurChar == 15)
@@ -1157,7 +1157,7 @@ function onload() {
     b.num = i;
     b.se = SOUNDS[i];
     b.se.image = bimgs[i];
-    b.addEventListener("click", function() {
+    b.addEventListener("click", function () {
       this.se.play(8); // Note F
       CurChar = this.num;
       clearEraserButton();
@@ -1179,11 +1179,11 @@ function onload() {
     }
     self.currentFrame = (self.currentFrame == 0) ? 1 : 0;
     SCREEN.style.cursor = 'url(' + self.images[self.currentFrame].src + ')' +
-      7 * MAGNIFY +' '+ 7 * MAGNIFY + ', auto';
+      7 * MAGNIFY + ' ' + 7 * MAGNIFY + ', auto';
   });
   endMarkTimer.images = b.images;
   endMarkTimer.currentFrame = 0;
-  b.addEventListener("click", function() {
+  b.addEventListener("click", function () {
     endMarkTimer.switch = true;
     CurChar = 15;
     SOUNDS[15].play(8);
@@ -1225,7 +1225,7 @@ function onload() {
   b.images = [imgs[2], imgs[3]]; // made in Stop button (above)
   b.style.backgroundImage = "url(" + b.images[0].src + ")";
   CurScore.loop = false;
-  b.addEventListener("click", function(e) {
+  b.addEventListener("click", function (e) {
     var num;
     if (CurScore.loop) {
       CurScore.loop = false;
@@ -1241,7 +1241,7 @@ function onload() {
     CurScore.loop = false;
     this.style.backgroundImage = "url(" + this.images[0].src + ")";
   };
-  b.set   = function () {
+  b.set = function () {
     CurScore.loop = true;
     this.style.backgroundImage = "url(" + this.images[1].src + ")";
   }
@@ -1260,7 +1260,7 @@ function onload() {
   r.max = CurMaxBars - 6;
   r.min = 0;
   r.step = 1;
-  r.style['-webkit-appearance']='none';
+  r.style['-webkit-appearance'] = 'none';
   r.style['border-radius'] = '0px';
   r.style['background-color'] = '#F8F8F8';
   r.style['box-shadow'] = 'inset 0 0 0 #000';
@@ -1273,7 +1273,7 @@ function onload() {
   r.originalH = 7;
   moveDOM(r, r.originalX, r.originalY);
   resizeDOM(r, r.originalW, r.originalH);
-  r.addEventListener("input", function(e) {
+  r.addEventListener("input", function (e) {
     CurPos = parseInt(this.value);
   });
   CONSOLE.appendChild(r);
@@ -1305,7 +1305,7 @@ function onload() {
     clone.splice(num, 1); // Remove No.i element
     var theOthers = clone;
 
-    return function(e) {
+    return function (e) {
       // Sound Off for file loading
       if (!e.soundOff) SOUNDS[17].play(8);
       self.disabled = true;
@@ -1333,13 +1333,13 @@ function onload() {
   b2.style.backgroundImage = "url(" + b2.images[1].src + ")";
   b2.disabled = true;
   CONSOLE.appendChild(b2);
-  var func = function(self) {CurScore.beats = self.beats};
+  var func = function (self) { CurScore.beats = self.beats };
   b1.addEventListener("click", makeExclusiveFunction([b1, b2], 0, func));
   b2.addEventListener("click", makeExclusiveFunction([b1, b2], 1, func));
 
   // Preapre Song Buttons (136, 202) 15x17, 160 - 136 = 24
   var imgs = sliceImage(songimg, 15, 17);
-  var b = ['frog','beak','1up'].map(function (id, idx) {
+  var b = ['frog', 'beak', '1up'].map(function (id, idx) {
     var b = makeButton(136 + 24 * idx, 202, 15, 17);
     b.id = id;
     b.num = idx;
@@ -1378,7 +1378,7 @@ function onload() {
     self.currentFrame = (self.currentFrame == 0) ? 1 : 0;
   });
   eraserTimer.currentFrame = 0;
-  b.addEventListener("click", function() {
+  b.addEventListener("click", function () {
     eraserTimer.switch = true;
     CurChar = 16;
     SOUNDS[17].play(8);
@@ -1398,7 +1398,7 @@ function onload() {
   r.max = 1000;
   r.min = 50;
   r.step = 1;
-  r.style['-webkit-appearance']='none';
+  r.style['-webkit-appearance'] = 'none';
   r.style['border-radius'] = '0px';
   r.style['background-color'] = 'rgba(0, 0, 0, 0.0)';
   r.style['box-shadow'] = 'inset 0 0 0 #000';
@@ -1411,7 +1411,7 @@ function onload() {
   r.originalH = 8;
   moveDOM(r, r.originalX, r.originalY);
   resizeDOM(r, r.originalW, r.originalH);
-  r.addEventListener("input", function(e) {
+  r.addEventListener("input", function (e) {
     CurScore.tempo = parseInt(this.value);
   });
   CONSOLE.appendChild(r);
@@ -1482,7 +1482,7 @@ function onload() {
   Semitones = sliceImage(semitoneimg, 5, 12);
 
   // Load Sound Files
-  Promise.all(SOUNDS.map(function (s) {return s.load()})).then(function (all) {
+  Promise.all(SOUNDS.map(function (s) { return s.load() })).then(function (all) {
     all.map(function (buffer, i) {
       SOUNDS[i].buffer = buffer;
     });
@@ -1497,7 +1497,7 @@ function onload() {
       new Promise(function (resolve, reject) {
         var req = new XMLHttpRequest();
         req.open('GET', url);
-        req.onload = function() {
+        req.onload = function () {
           if (req.status == 200) {
             resolve(req.response);
           } else {
@@ -1505,12 +1505,12 @@ function onload() {
           }
         };
 
-        req.onerror = function() {
+        req.onerror = function () {
           reject(Error("Network Error"));
         };
 
         req.send();
-      }).then(function(response) {
+      }).then(function (response) {
         var msq = false;
         if (url.slice(-3) == "msq")
           addMSQ(response);
@@ -1528,23 +1528,23 @@ function onload() {
     } else if (OPTS.S != undefined || OPTS.SCORE != undefined) {
       var score = OPTS.SCORE || OPTS.S;
       var tempo = OPTS.TEMPO || OPTS.T;
-      var loop  = (OPTS.LOOP  || OPTS.L);
-      var end   = OPTS.END   || OPTS.E;
+      var loop = (OPTS.LOOP || OPTS.L);
+      var end = OPTS.END || OPTS.E;
       var beats = (OPTS.TIME44 || OPTS.B);
 
       if (tempo == undefined || loop == undefined || end == undefined ||
-          beats == undefined) {
+        beats == undefined) {
         throw new Error("Not enough parameters");
       }
 
-      loop  = loop.toUpperCase();
+      loop = loop.toUpperCase();
       beats = beats.toUpperCase();
 
       var text = "SCORE=" + score + "\n" +
-                 "TEMPO=" + tempo + "\n" +
-                 "LOOP=" + ((loop == "T" || loop == "TRUE") ? "TRUE" : "FALSE") + "\n" +
-                 "END=" + end + "\n" +
-                 "TIME44=" + ((beats == "T" || beats == "TRUE") ? "TRUE" : "FALSE");
+        "TEMPO=" + tempo + "\n" +
+        "LOOP=" + ((loop == "T" || loop == "TRUE") ? "TRUE" : "FALSE") + "\n" +
+        "END=" + end + "\n" +
+        "TIME44=" + ((beats == "T" || beats == "TRUE") ? "TRUE" : "FALSE");
       fullInitScore();
       addMSQ(text);
       closing();
@@ -1556,14 +1556,14 @@ function onload() {
     console.error("Invalid GET parameter :" + err.stack);
   });
 
-  document.addEventListener('keydown',function(e) {
+  document.addEventListener('keydown', function (e) {
     switch (e.keyCode) {
       case 32: // space -> play/stop or restart with shift
         var playBtn = document.getElementById('play');
         if (playBtn.disabled == false || e.shiftKey) {
-          playListener.call(playBtn,e);
+          playListener.call(playBtn, e);
         } else {
-          stopListener.call(document.getElementById('stop'),e);
+          stopListener.call(document.getElementById('stop'), e);
         }
         e.preventDefault();
         break;
@@ -1602,8 +1602,8 @@ function clearListener(e) {
   SOUNDS[19].play(8);
   var self = this;
   function makePromise(num) {
-    return new Promise(function(resolve, reject) {
-      setTimeout(function() {
+    return new Promise(function (resolve, reject) {
+      setTimeout(function () {
         self.style.backgroundImage = "url(" + self.images[num].src + ")";
         resolve()
       }, 150);
@@ -1632,7 +1632,7 @@ function playListener(e) {
   this.disabled = true; // Would be unlocked by stop button
 
   ["toLeft", "toRight", "scroll", "clear", "frog", "beak", "1up"].
-    map(function (id) {document.getElementById(id).disabled = true;});
+    map(function (id) { document.getElementById(id).disabled = true; });
 
   GameStatus = 1; // Mario Entering the stage
   CurPos = 0;     // doAnimation will draw POS 0 and stop
@@ -1713,7 +1713,7 @@ function doMarioLeave(timeStamp) {
 
 // Clear Song Buttons
 function clearSongButtons() {
-  ['frog','beak','1up'].map(function (id, idx) {
+  ['frog', 'beak', '1up'].map(function (id, idx) {
     var b = document.getElementById(id);
     b.disabled = false;
     b.style.backgroundImage = "url(" + b.images[0].src + ")";
@@ -1780,7 +1780,7 @@ function sliceImage(img, width, height) {
 
   for (var i = 0; i < all; i++) {
     var tmpcan = document.createElement("canvas");
-    tmpcan.width  = charw;
+    tmpcan.width = charw;
     tmpcan.height = charh;
     var tmpctx = tmpcan.getContext('2d');
     tmpctx.imageSmoothingEnabled = false;
@@ -1800,56 +1800,62 @@ function download() {
   var link = document.createElement("a");
   link.download = 'MSQ_Data.json';
   var json = JSON.stringify(CurScore);
-  var blob = new Blob([json], {type: "octet/stream"});
+  var blob = new Blob([json], { type: "octet/stream" });
   var url = window.URL.createObjectURL(blob);
   link.href = url;
   link.click();
 }
 
 EmbeddedSong = [];
-EmbeddedSong[0] = {"notes":[[1026,2313],[1026,2313],[],[1026,2313],
-  [],[1028,2315],[1026,2313],[],[1024,2311],[],[],[],[517,3591,265],
-  [],[],[],[2818,2820,267],[],[3072,3595],[3072,2818,3595],
-  [2817,2820,267],[],[3072,3592],[3072,2817,3591],[2816,2819,267],[],
-  [3072,3591],[2816,1287,3595],[2817,1286,1288],[262,1288,1290],
-  [1286,3591,1288],[1285,1287,266],[2,3595,3084],[],[256],[257,3595],
-  [4,3593,3084],[],[256],[257,7,3593],[6,3592,3084],[4],[256,3592],
-  [257,4,3590],[3084],[256],[],[257,6,3591],[7,3084],[3591],
-  [256,4,3592],[257],[4,3593,3084],[],[0,3594],[257],[2,3591],[1031],
-  [256,1030],[3,1029,3592],[1028],[1027,262],[1026],[1025,263],
-  [1026,266,3595],[7],[2050,4],[7,266,3595],[1028,3593,266],[7],
-  [2050,4],[5,1031,3593],[1030,3592,266],[1028,6,2568],[4],
-  [1,1028,3590],[264],[2049,2,260],[3,260],[261,1030],[1031,266],
-  [3584,2,7],[1028],[1,5,7],[1025,3591],[1026],[1027],[],[1028],
-  [258,3588],[],[260,3595],[261,3595],[],[261,267],[],[]],
-  "beats":4,"loop":false,"end":96,"tempo":"370"};
+EmbeddedSong[0] = {
+  "notes": [[1026, 2313], [1026, 2313], [], [1026, 2313],
+  [], [1028, 2315], [1026, 2313], [], [1024, 2311], [], [], [], [517, 3591, 265],
+  [], [], [], [2818, 2820, 267], [], [3072, 3595], [3072, 2818, 3595],
+  [2817, 2820, 267], [], [3072, 3592], [3072, 2817, 3591], [2816, 2819, 267], [],
+  [3072, 3591], [2816, 1287, 3595], [2817, 1286, 1288], [262, 1288, 1290],
+  [1286, 3591, 1288], [1285, 1287, 266], [2, 3595, 3084], [], [256], [257, 3595],
+  [4, 3593, 3084], [], [256], [257, 7, 3593], [6, 3592, 3084], [4], [256, 3592],
+  [257, 4, 3590], [3084], [256], [], [257, 6, 3591], [7, 3084], [3591],
+  [256, 4, 3592], [257], [4, 3593, 3084], [], [0, 3594], [257], [2, 3591], [1031],
+  [256, 1030], [3, 1029, 3592], [1028], [1027, 262], [1026], [1025, 263],
+  [1026, 266, 3595], [7], [2050, 4], [7, 266, 3595], [1028, 3593, 266], [7],
+  [2050, 4], [5, 1031, 3593], [1030, 3592, 266], [1028, 6, 2568], [4],
+  [1, 1028, 3590], [264], [2049, 2, 260], [3, 260], [261, 1030], [1031, 266],
+  [3584, 2, 7], [1028], [1, 5, 7], [1025, 3591], [1026], [1027], [], [1028],
+  [258, 3588], [], [260, 3595], [261, 3595], [], [261, 267], [], []],
+  "beats": 4, "loop": false, "end": 96, "tempo": "370"
+};
 
-EmbeddedSong[1] = {"notes":[[772,779],[768],[770,779],[768],[772,775],
-  [768],[770,775],[768],[772,774],[769],[772,774],[769],[768,770,775],
-  [],[],[],[769,774,776],[772],[769,774,776],[772],[770,775,777],
-  [772],[770,775,777],[772],[771,773,778],[775],[771,778],[773],
-  [771,777,779],[],[],[],[775,777],[768],[775,777],[768],[776,778],
-  [768],[776,778],[768],[777,779],[768],[777,779],[768],[778,780],
-  [],[],[],[775],[768,772],[775],[768,772],[776],[768,772],[776],
-  [768,772],[777],[768,772],[777],[768,772],[771,773,778],[],[],[],
-  [777,779],[779],[777,779],[779],[775,777],[777],[775,777],[777],
-  [774,776],[776],[774,776],[776],[768,775,777],[],[],[],[774,776],
-  [776],[774,776],[773],[772,777],[775],[772,777],[],[771,775,778],
-  [],[771,775,778],[],[772,777,779],[],[],[],[]],
-  "beats":4,"loop":true,"end":96,"tempo":"178"};
+EmbeddedSong[1] = {
+  "notes": [[772, 779], [768], [770, 779], [768], [772, 775],
+  [768], [770, 775], [768], [772, 774], [769], [772, 774], [769], [768, 770, 775],
+  [], [], [], [769, 774, 776], [772], [769, 774, 776], [772], [770, 775, 777],
+  [772], [770, 775, 777], [772], [771, 773, 778], [775], [771, 778], [773],
+  [771, 777, 779], [], [], [], [775, 777], [768], [775, 777], [768], [776, 778],
+  [768], [776, 778], [768], [777, 779], [768], [777, 779], [768], [778, 780],
+  [], [], [], [775], [768, 772], [775], [768, 772], [776], [768, 772], [776],
+  [768, 772], [777], [768, 772], [777], [768, 772], [771, 773, 778], [], [], [],
+  [777, 779], [779], [777, 779], [779], [775, 777], [777], [775, 777], [777],
+  [774, 776], [776], [774, 776], [776], [768, 775, 777], [], [], [], [774, 776],
+  [776], [774, 776], [773], [772, 777], [775], [772, 777], [], [771, 775, 778],
+  [], [771, 775, 778], [], [772, 777, 779], [], [], [], []],
+  "beats": 4, "loop": true, "end": 96, "tempo": "178"
+};
 
-EmbeddedSong[2] = {"notes":[[266,3595],[3072,2,7],[3591,3081],[3072,2,7],
-  [2305,3590,266],[2305,2,7],[1,2307,3594],[3078],[266,3595],[3072,2,7],
-  [3591,3081],[3072,2,7],[2305,3590,266],[2305,3,7],[1,2307,3594],[],
-  [1028,3079,3595],[3072,2,7],[1028,3078,3591],[1026,261,7],[1024,267],
-  [],[1543],[],[1281,3594],[1,6],[1281,3590],[1282,6],[1283],[],[1798],
-  [],[1027,3079,3594],[3072,1,6],[1027,3590,3082],[1025,261,6],[1030,267],
-  [],[2055,2059],[],[1280,1285,3595],[2,7],[1280,1285,3591],[1281,2,1286],
-  [1282,1287,266],[2571],[],[],[1287,779],[775],[1287,777],[772,1287],
-  [1284,775,264],[2306,3077],[2306,264],[2308,3077],[1286,2826],[2822],
-  [1286,2824],[2819,1286],[1284,2822,264],[2305,3077],[2305,264],
-  [2307,3077],[1285,3335,264],[3331],[1285,3335],[3329,1285],
-  [1283,1029,264],[],[519],[],[2304,1282,1028],[2304,1282,1028],
-  [2304,1282,1028],[2305,1283,1029],[2306,1284,1030],[],[2304,1282,1028],
-  [],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[]],
-  "beats":4,"loop":true,"end":80,"tempo":"287"};
+EmbeddedSong[2] = {
+  "notes": [[266, 3595], [3072, 2, 7], [3591, 3081], [3072, 2, 7],
+  [2305, 3590, 266], [2305, 2, 7], [1, 2307, 3594], [3078], [266, 3595], [3072, 2, 7],
+  [3591, 3081], [3072, 2, 7], [2305, 3590, 266], [2305, 3, 7], [1, 2307, 3594], [],
+  [1028, 3079, 3595], [3072, 2, 7], [1028, 3078, 3591], [1026, 261, 7], [1024, 267],
+  [], [1543], [], [1281, 3594], [1, 6], [1281, 3590], [1282, 6], [1283], [], [1798],
+  [], [1027, 3079, 3594], [3072, 1, 6], [1027, 3590, 3082], [1025, 261, 6], [1030, 267],
+  [], [2055, 2059], [], [1280, 1285, 3595], [2, 7], [1280, 1285, 3591], [1281, 2, 1286],
+  [1282, 1287, 266], [2571], [], [], [1287, 779], [775], [1287, 777], [772, 1287],
+  [1284, 775, 264], [2306, 3077], [2306, 264], [2308, 3077], [1286, 2826], [2822],
+  [1286, 2824], [2819, 1286], [1284, 2822, 264], [2305, 3077], [2305, 264],
+  [2307, 3077], [1285, 3335, 264], [3331], [1285, 3335], [3329, 1285],
+  [1283, 1029, 264], [], [519], [], [2304, 1282, 1028], [2304, 1282, 1028],
+  [2304, 1282, 1028], [2305, 1283, 1029], [2306, 1284, 1030], [], [2304, 1282, 1028],
+  [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], []],
+  "beats": 4, "loop": true, "end": 80, "tempo": "287"
+};
