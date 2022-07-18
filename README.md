@@ -1,6 +1,7 @@
 Mario Sequencer
 ====
 **Mario Composer Fork from https://github.com/minghai/MarioSequencer**
+------
 
 This is good old Mario Sequencer Web Edition.
 Works only on Chrome (at least for now).
